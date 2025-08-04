@@ -1,0 +1,44 @@
+name: Build and Run Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Docker Buildx (optional, good for compatibility)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 3: Remove old container (if exists)
+      - name: Remove old Docker container
+        run: |
+          docker rm -f rest_api_tuts_container || true
+
+      # Step 4: Remove old Docker image (if exists)
+      - name: Remove old Docker image
+        run: |
+          docker rmi rest_api_tuts:latest || true
+
+      # Step 5: Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t rest_api_tuts:latest .
+     # Step 6: Remove Unwanted Docker images
+      - name: Remove Unwanted Docker images
+        run: |
+          docker system prune -f
+    
+      # Step 6: Run Docker container
+      - name: Run Docker container
+        run: |
+          docker run -d -p 8080:8080 --name rest_api_tuts_container rest_api_tuts:latest
+ 
